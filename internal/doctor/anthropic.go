@@ -53,15 +53,29 @@ func probeAnthropic(env map[string]string, model string, insecure bool) Result {
 	return res
 }
 
-// anthropicAuth returns a function that sets the right auth header.
+// anthropicAuth returns a function that sets auth headers. To be robust across
+// proxies/gateways (which variously check x-api-key or Authorization: Bearer for
+// different endpoints — e.g. some want Bearer on /v1/models but x-api-key on
+// /v1/messages), it sets whichever it can: x-api-key from ANTHROPIC_API_KEY, and
+// Authorization: Bearer from ANTHROPIC_AUTH_TOKEN (falling back to the api key).
 func anthropicAuth(env map[string]string) (func(*http.Request), bool) {
-	if tok := env["ANTHROPIC_AUTH_TOKEN"]; tok != "" {
-		return func(r *http.Request) { r.Header.Set("Authorization", "Bearer "+tok) }, true
+	key := env["ANTHROPIC_API_KEY"]
+	tok := env["ANTHROPIC_AUTH_TOKEN"]
+	if key == "" && tok == "" {
+		return nil, false
 	}
-	if key := env["ANTHROPIC_API_KEY"]; key != "" {
-		return func(r *http.Request) { r.Header.Set("x-api-key", key) }, true
+	bearer := tok
+	if bearer == "" {
+		bearer = key
 	}
-	return nil, false
+	return func(r *http.Request) {
+		if key != "" {
+			r.Header.Set("x-api-key", key)
+		}
+		if bearer != "" {
+			r.Header.Set("Authorization", "Bearer "+bearer)
+		}
+	}, true
 }
 
 // discoverAnthropicModel lists models and returns the first containing "claude"
