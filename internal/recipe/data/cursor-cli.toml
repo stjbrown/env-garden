@@ -1,0 +1,14 @@
+tool = "cursor"
+provider = "cli"
+description = "Cursor CLI (cursor-agent) auth via API key"
+default_name = "cursor"
+notes = "The Cursor CLI routes only through Cursor's backend — it cannot use a custom base URL. Pointing the Cursor GUI at a proxy is a manual step (Settings > Models > Override OpenAI Base URL)."
+
+[[param]]
+name = "key_ref"
+prompt = "Cursor API key — a 1Password reference like op://Vault/Item/credential (recommended) or a literal value"
+secret = true
+
+[[env]]
+key = "CURSOR_API_KEY"
+value = "{{key_ref}}"

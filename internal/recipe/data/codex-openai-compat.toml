@@ -1,0 +1,31 @@
+tool = "codex"
+provider = "openai-compat"
+description = "OpenAI Codex CLI via an OpenAI-compatible endpoint (proxy/gateway)"
+default_name = "codex"
+notes = "Codex needs the Responses wire API. This writes a [model_providers.<id>] block to ~/.codex/config.toml and an overlay you select with: codex --profile <id>. For a self-signed corporate cert, add CODEX_CA_CERTIFICATE to the profile."
+
+[[param]]
+name = "provider_id"
+prompt = "Codex provider id (the [model_providers.<id>] name; also the --profile name)"
+default = "custom"
+
+[[param]]
+name = "base_url"
+prompt = "Base URL (OpenAI-compatible, e.g. https://proxy.example.com/v1)"
+
+[[param]]
+name = "model"
+prompt = "Default model name exposed by the endpoint"
+
+[[param]]
+name = "key_ref"
+prompt = "API key — a 1Password reference like op://Vault/Item/credential (recommended) or a literal value"
+secret = true
+
+[[env]]
+key = "OPENAI_API_KEY"
+value = "{{key_ref}}"
+
+[[file]]
+tool = "codex"
+path = "~/.codex/config.toml"

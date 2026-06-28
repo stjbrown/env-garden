@@ -1,0 +1,13 @@
+# Never commit real profiles (they may contain secrets); ship only *.example.
+.env
+.env.*
+!*.env.*.example
+!*.env.example
+
+# 1Password / backup artifacts
+*.eg-bak-*
+
+# Build output
+/dist/
+/eg
+*.out

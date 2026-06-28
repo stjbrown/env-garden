@@ -1,0 +1,26 @@
+tool = "claude-code"
+provider = "vertex"
+description = "Claude Code via Google Vertex AI"
+default_name = "vertex"
+notes = "Auth uses Application Default Credentials (gcloud auth application-default login)."
+
+[[param]]
+name = "project"
+prompt = "GCP project ID"
+
+[[param]]
+name = "region"
+prompt = "Vertex region (use 'global' for broad model availability)"
+default = "global"
+
+[[env]]
+key = "CLAUDE_CODE_USE_VERTEX"
+value = "1"
+
+[[env]]
+key = "CLOUD_ML_REGION"
+value = "{{region}}"
+
+[[env]]
+key = "ANTHROPIC_VERTEX_PROJECT_ID"
+value = "{{project}}"

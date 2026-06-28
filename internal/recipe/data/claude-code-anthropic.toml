@@ -1,0 +1,22 @@
+tool = "claude-code"
+provider = "anthropic"
+description = "Claude Code via an Anthropic-compatible endpoint (proxy/gateway/custom)"
+default_name = "anthropic"
+notes = "Covers corporate proxies and customer endpoints. Uses bearer auth (ANTHROPIC_AUTH_TOKEN); if your endpoint expects an x-api-key header instead, rename that var to ANTHROPIC_API_KEY in the profile."
+
+[[param]]
+name = "base_url"
+prompt = "Base URL (e.g. https://proxy.example.com)"
+
+[[param]]
+name = "key_ref"
+prompt = "API key — a 1Password reference like op://Vault/Item/credential (recommended) or a literal value"
+secret = true
+
+[[env]]
+key = "ANTHROPIC_BASE_URL"
+value = "{{base_url}}"
+
+[[env]]
+key = "ANTHROPIC_AUTH_TOKEN"
+value = "{{key_ref}}"

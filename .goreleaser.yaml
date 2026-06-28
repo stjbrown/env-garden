@@ -1,0 +1,52 @@
+version: 2
+
+project_name: env-garden
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: eg
+    main: ./cmd/eg
+    binary: eg
+    env:
+      - CGO_ENABLED=0
+    goos: [darwin, linux]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+
+archives:
+  - id: eg
+    formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+brews:
+  - name: eg
+    repository:
+      owner: stjbrown
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: "https://github.com/stjbrown/env-garden"
+    description: "A per-shell environment profile switcher with batteries"
+    license: "MIT"
+    install: |
+      bin.install "eg"
+    test: |
+      system "#{bin}/eg", "--version"
+    caveats: |
+      Add the shell integration to your rc file:
+        echo 'eval "$(eg init zsh)"'  >> ~/.zshrc
+        echo 'eval "$(eg init bash)"' >> ~/.bashrc

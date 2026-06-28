@@ -1,0 +1,27 @@
+tool = "claude-code"
+provider = "bedrock"
+description = "Claude Code via AWS Bedrock"
+default_name = "bedrock"
+notes = "Auth uses your AWS profile (aws sso login --profile <name>). No API key needed."
+
+[[param]]
+name = "aws_profile"
+prompt = "AWS profile name"
+default = "default"
+
+[[param]]
+name = "region"
+prompt = "AWS region"
+default = "us-east-1"
+
+[[env]]
+key = "CLAUDE_CODE_USE_BEDROCK"
+value = "1"
+
+[[env]]
+key = "AWS_PROFILE"
+value = "{{aws_profile}}"
+
+[[env]]
+key = "AWS_REGION"
+value = "{{region}}"
