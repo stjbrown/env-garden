@@ -22,7 +22,7 @@ func newDoctorCmd() *cobra.Command {
 		Long: "Send a tiny real request to verify a profile actually works.\n" +
 			"With no argument, tests the profile active in this shell.",
 		Args:              cobra.MaximumNArgs(1),
-		ValidArgsFunction: completeProfiles,
+		ValidArgsFunction: completeProfile,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := os.Getenv(shell.ActiveVar)
 			if len(args) == 1 {

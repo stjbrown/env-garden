@@ -18,20 +18,20 @@ func newRenderCmd() *cobra.Command {
 		forceResolve bool
 	)
 	c := &cobra.Command{
-		Use:   "render <profile>",
-		Short: "Write a profile to a project env file",
+		Use:   "render <profile> [profile...]",
+		Short: "Write one or more profiles to a project env file",
 		Long: "Materialize a profile as a .env file for an app to consume.\n\n" +
+			"Multiple profiles are merged in order (later values win on conflicts),\n" +
+			"so a single file can combine, say, dev + a customer proxy + slack creds:\n\n" +
+			"  eg render dev-vertex zscaler slack -o .env --resolve\n\n" +
 			"By default, op:// references are written verbatim (no secrets on disk).\n" +
 			"--resolve writes real values, but only if the output is git-ignored.\n" +
 			"--force-resolve writes real values without the git-ignore check.",
-		Args:              cobra.ExactArgs(1),
+		Args:              cobra.MinimumNArgs(1),
 		ValidArgsFunction: completeProfiles,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			p, err := profile.Load(args[0])
+			p, err := loadMerged(args)
 			if err != nil {
-				if os.IsNotExist(err) {
-					return fmt.Errorf("no profile %q (try: eg list)", args[0])
-				}
 				return err
 			}
 			doResolve := resolve || forceResolve

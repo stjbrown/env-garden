@@ -19,7 +19,7 @@ func newDefaultCmd() *cobra.Command {
 			"shell starts (and no profile is already active). Stored as data in the\n" +
 			"config dir, so it survives upgrades and can be synced across machines.",
 		Args:              cobra.MaximumNArgs(1),
-		ValidArgsFunction: completeProfiles,
+		ValidArgsFunction: completeProfile,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if clear {
 				if err := config.ClearDefault(); err != nil {

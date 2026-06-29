@@ -8,30 +8,29 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/stjbrown/env-garden/internal/profile"
 	"github.com/stjbrown/env-garden/internal/shell"
 )
 
 func newExecCmd() *cobra.Command {
 	c := &cobra.Command{
-		Use:   "exec <profile> [--] <command> [args...]",
-		Short: "Run a command with a profile's environment injected",
+		Use:   "exec <profile> [profile...] -- <command> [args...]",
+		Short: "Run a command with one or more profiles' environment injected",
 		Long: "Run a command in a subprocess with the profile's variables set,\n" +
 			"resolving op:// references in-memory. The current shell is untouched.\n\n" +
-			"  eg exec myproxy -- python agent.py",
+			"  eg exec myproxy -- python agent.py\n\n" +
+			"Multiple profiles are merged in order (later values win); the `--`\n" +
+			"separator is required when passing more than one profile:\n\n" +
+			"  eg exec dev-vertex zscaler slack -- python agent.py",
 		Args:                  cobra.MinimumNArgs(1),
 		ValidArgsFunction:     completeProfiles,
 		DisableFlagsInUseLine: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			name, rest, err := splitExecArgs(args)
+			names, rest, err := splitExecArgs(args, profileExists)
 			if err != nil {
 				return err
 			}
-			p, err := profile.Load(name)
+			p, err := loadMerged(names)
 			if err != nil {
-				if os.IsNotExist(err) {
-					return fmt.Errorf("no profile %q (try: eg list)", name)
-				}
 				return err
 			}
 			pairs, err := resolvePairs(p)
@@ -40,7 +39,7 @@ func newExecCmd() *cobra.Command {
 			}
 
 			child := exec.Command(rest[0], rest[1:]...)
-			child.Env = mergeEnv(os.Environ(), pairs, name)
+			child.Env = mergeEnv(os.Environ(), pairs, p.Name)
 			child.Stdin, child.Stdout, child.Stderr = os.Stdin, os.Stdout, os.Stderr
 			if err := child.Run(); err != nil {
 				var ee *exec.ExitError
@@ -57,18 +56,42 @@ func newExecCmd() *cobra.Command {
 	return c
 }
 
-// splitExecArgs separates the profile name from the command to run. With
-// SetInterspersed(false), pflag stops flag parsing after the profile name and
-// passes a literal "--" through, so we strip an optional leading "--" here.
-func splitExecArgs(args []string) (name string, rest []string, err error) {
-	name, rest = args[0], args[1:]
-	if len(rest) > 0 && rest[0] == "--" {
-		rest = rest[1:]
+// splitExecArgs separates the profile name(s) from the command to run. With
+// SetInterspersed(false), pflag stops flag parsing at the first positional arg
+// and passes a literal "--" through as a regular element, so we split on it
+// here:
+//
+//   - With a "--": everything before it is profile names, everything after is
+//     the command. This is the only unambiguous form for multiple profiles.
+//   - Without a "--": the first arg is a single profile and the rest is the
+//     command (the original single-profile shorthand, kept for compatibility).
+//
+// isProfile reports whether a name is a known profile; it is used only to give a
+// helpful hint when the shorthand is used but the second token also looks like a
+// profile (the likely "forgot the --" mistake).
+func splitExecArgs(args []string, isProfile func(string) bool) (names []string, rest []string, err error) {
+	for i, a := range args {
+		if a == "--" {
+			names, rest = args[:i], args[i+1:]
+			if len(names) == 0 {
+				return nil, nil, errors.New("no profile given (usage: eg exec <profile> [profile...] -- <command>)")
+			}
+			if len(rest) == 0 {
+				return nil, nil, errors.New("no command given (usage: eg exec <profile> [profile...] -- <command>)")
+			}
+			return names, rest, nil
+		}
 	}
+	// No "--": single-profile shorthand.
+	names, rest = args[:1], args[1:]
 	if len(rest) == 0 {
-		return "", nil, errors.New("no command given (usage: eg exec <profile> -- <command>)")
+		return nil, nil, errors.New("no command given (usage: eg exec <profile> [profile...] -- <command>)")
 	}
-	return name, rest, nil
+	if isProfile != nil && isProfile(rest[0]) {
+		return nil, nil, fmt.Errorf("%q looks like another profile; to combine profiles, separate them from the command with --:\n"+
+			"  eg exec %s %s -- <command>", rest[0], names[0], rest[0])
+	}
+	return names, rest, nil
 }
 
 // mergeEnv overlays the resolved pairs (and EG_ACTIVE) onto base, with later

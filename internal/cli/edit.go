@@ -15,7 +15,7 @@ func newEditCmd() *cobra.Command {
 		Use:               "edit <profile>",
 		Short:             "Open a profile in $EDITOR",
 		Args:              cobra.ExactArgs(1),
-		ValidArgsFunction: completeProfiles,
+		ValidArgsFunction: completeProfile,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			exists, err := profile.Exists(args[0])
 			if err != nil {
