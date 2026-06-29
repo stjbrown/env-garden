@@ -7,9 +7,9 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/spf13/cobra"
 	"github.com/stjbrown/env-garden/internal/profile"
 	"github.com/stjbrown/env-garden/internal/shell"
-	"github.com/spf13/cobra"
 )
 
 func newExecCmd() *cobra.Command {

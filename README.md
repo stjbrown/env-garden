@@ -44,15 +44,19 @@ curl -fsSL https://raw.githubusercontent.com/stjbrown/env-garden/main/install.sh
 go install github.com/stjbrown/env-garden/cmd/eg@latest
 ```
 
-Then add the shell integration (once):
+Then wire the shell integration (once):
 
 ```sh
-echo 'eval "$(eg init zsh)"'  >> ~/.zshrc     # zsh
-echo 'eval "$(eg init bash)"' >> ~/.bashrc    # bash
+eg setup            # adds the integration line to ~/.zshrc (idempotent, backs up first)
+eg default vertex   # provider every new shell starts on (override per-shell with `eg use`)
+exec zsh            # reload
 ```
 
-The shim is required because only a function sourced into your shell can change
-that shell's environment — a plain binary runs in a child process and can't.
+`eg setup` writes `eval "$(eg init <shell>)"` to your rc file. The shim is
+required because only a function sourced into your shell can change that shell's
+environment — a plain binary runs in a child process and can't. The written line
+re-runs `eg init` each startup, so upgrades and `eg default` changes are picked up
+without re-running setup.
 
 ## Profiles
 
@@ -95,6 +99,8 @@ export ANTHROPIC_AUTH_TOKEN=op://Private/myproxy/credential
 
 | Command | What it does |
 |---|---|
+| `eg setup [zsh\|bash]` | Add the integration line to your rc file (idempotent, with backup). |
+| `eg default [profile]` | Get/set the provider new shells start on (applied automatically by the shim). |
 | `eg use <profile>` | Load a profile into the current shell (replaces the previous one). |
 | `eg off` | Clear the active profile from the current shell. |
 | `eg exec <profile> -- <cmd>` | Run a command with the profile's env injected (subprocess only). |

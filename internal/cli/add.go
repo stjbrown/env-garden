@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/spf13/cobra"
 	"github.com/stjbrown/env-garden/internal/config"
 	"github.com/stjbrown/env-garden/internal/profile"
 	"github.com/stjbrown/env-garden/internal/recipe"
 	"github.com/stjbrown/env-garden/internal/toolconfig"
-	"github.com/spf13/cobra"
 )
 
 func newAddCmd() *cobra.Command {

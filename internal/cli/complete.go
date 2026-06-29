@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"github.com/stjbrown/env-garden/internal/profile"
 	"github.com/spf13/cobra"
+	"github.com/stjbrown/env-garden/internal/profile"
 )
 
 // completeProfiles offers profile names for shell completion.

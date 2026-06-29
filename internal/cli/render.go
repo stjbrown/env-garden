@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/stjbrown/env-garden/internal/profile"
 	"github.com/spf13/cobra"
+	"github.com/stjbrown/env-garden/internal/profile"
 )
 
 func newRenderCmd() *cobra.Command {

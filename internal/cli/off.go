@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/stjbrown/env-garden/internal/shell"
 	"github.com/spf13/cobra"
+	"github.com/stjbrown/env-garden/internal/shell"
 )
 
 func newOffCmd() *cobra.Command {

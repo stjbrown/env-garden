@@ -7,8 +7,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/stjbrown/env-garden/internal/shell"
 	"github.com/spf13/cobra"
+	"github.com/stjbrown/env-garden/internal/shell"
 )
 
 func newStatusCmd() *cobra.Command {

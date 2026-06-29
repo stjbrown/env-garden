@@ -32,6 +32,12 @@ func ParseKind(s string) (Kind, error) {
 // its stdout/stderr and exit code pass through untouched. All human-facing
 // messages are written to stderr by the binary, keeping stdout eval-clean.
 //
+// After defining the function it applies the default profile (if one is set and
+// the shell isn't already in a profile), so a single `eval "$(eg init zsh)"`
+// line both installs the shim and lands every new shell on the default. Because
+// the line re-runs `eg init` each startup, upgrades and default changes are
+// picked up with no need to re-edit the rc file.
+//
 // The body is pure POSIX sh (no arrays, no [[ ]]), valid in zsh and bash 3.2.
 func Init(k Kind, binPath string) string {
 	q := SingleQuote(binPath)
@@ -48,5 +54,10 @@ eg() {
       "$__EG_BIN" "$@" ;;
   esac
 }
+if [ -z "${EG_ACTIVE:-}" ]; then
+  __eg_boot="$("$__EG_BIN" boot 2>/dev/null)"
+  [ -n "$__eg_boot" ] && eval "$__eg_boot"
+  unset __eg_boot
+fi
 `, k, q)
 }

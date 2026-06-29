@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"text/tabwriter"
 
-	"github.com/stjbrown/env-garden/internal/recipe"
 	"github.com/spf13/cobra"
+	"github.com/stjbrown/env-garden/internal/recipe"
 )
 
 func newRecipesCmd() *cobra.Command {

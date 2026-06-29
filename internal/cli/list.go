@@ -5,8 +5,8 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/stjbrown/env-garden/internal/profile"
 	"github.com/spf13/cobra"
+	"github.com/stjbrown/env-garden/internal/profile"
 )
 
 func newListCmd() *cobra.Command {

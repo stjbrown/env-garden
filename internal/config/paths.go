@@ -62,6 +62,49 @@ func ExpandTilde(path string) (string, error) {
 	return filepath.Join(home, path[2:]), nil
 }
 
+// DefaultPath returns the path to the file storing the default profile name.
+func DefaultPath() (string, error) {
+	dir, err := Dir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "default"), nil
+}
+
+// ReadDefault returns the configured default profile name, or "" if none.
+func ReadDefault() string {
+	path, err := DefaultPath()
+	if err != nil {
+		return ""
+	}
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(b))
+}
+
+// WriteDefault records name as the default profile.
+func WriteDefault(name string) error {
+	dir, err := EnsureDir()
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(dir, "default"), []byte(name+"\n"), 0o600)
+}
+
+// ClearDefault removes the default profile setting.
+func ClearDefault() error {
+	path, err := DefaultPath()
+	if err != nil {
+		return err
+	}
+	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
+}
+
 // NameFromFile extracts the profile name from a ".env.<name>" filename, or ""
 // if base is not a profile file.
 func NameFromFile(base string) string {
