@@ -1,6 +1,8 @@
 ---
 name: eg
 description: Run or test a command against a specific AI/cloud provider profile using env-garden (the `eg` CLI). Use when the user wants to test, smoke-test, or run something against a named provider profile (e.g. bedrock, vertex, myproxy, a customer endpoint), check whether a provider works, or run an agent/script against a particular backend. Triggers include "test the X profile", "run this against bedrock", "does vertex work", "use the myproxy endpoint", "eg exec", "smoke test the provider".
+license: MIT
+compatibility: Requires the `eg` CLI (env-garden) installed; for op:// secret references, the 1Password CLI (`op`) must be installed and signed in.
 ---
 
 # Using env-garden (`eg`) from an agent
