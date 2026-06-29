@@ -45,6 +45,7 @@ func NewRoot() *cobra.Command {
 		newDefaultCmd(),
 		newExecCmd(),
 		newRenderCmd(),
+		newExportCmd(),
 		newAddCmd(),
 		newRecipesCmd(),
 		newDoctorCmd(),
