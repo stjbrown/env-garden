@@ -123,6 +123,29 @@ Requires the [1Password CLI](https://developer.1password.com/docs/cli/) (`brew
 install --cask 1password-cli`), ideally with the desktop-app integration enabled
 (Settings → Developer → *Integrate with 1Password CLI*).
 
+### Combining profiles
+
+Keep each concern in its own small profile and **stack them** at use time, rather
+than maintaining one big copy per combination. `use`, `exec`, `export`, and
+`render` all accept several profiles and merge them left-to-right:
+
+```sh
+# one .env with your dev Vertex + a customer's Zscaler proxy + Slack creds
+eg render dev-vertex zscaler slack -o .env --resolve
+
+eg use dev-vertex zscaler slack            # load the merged set into this shell
+eg exec dev-vertex zscaler slack -- python agent.py
+eval "$(eg export dev-vertex zscaler slack)"
+```
+
+- **Order matters:** when two profiles set the same key, the **later** one wins.
+  Each override is reported to stderr (e.g. `eg: HTTPS_PROXY from "zscaler"
+  overrides "dev-vertex"`) so a clobbered value is never silent.
+- `EG_ACTIVE` becomes the joined name (`dev-vertex+zscaler+slack`), and `eg
+  status` shows the full merged variable set.
+- With `eg exec`, the `--` separator is **required** when passing more than one
+  profile, so profile names and the command stay unambiguous.
+
 ---
 
 ## Switching
@@ -159,11 +182,11 @@ eval "$(eg export vertex)"   # (or: eg use vertex)
 |---|---|
 | `eg setup [zsh\|bash]` | Add the integration line to your rc file (idempotent, with backup). |
 | `eg default [profile]` | Get/set the provider new shells start on (auto-applied by the shim). |
-| `eg use <profile>` | Load a profile into the current shell. |
+| `eg use <profile>…` | Load one or more profiles into the current shell (merged left-to-right). |
 | `eg off` | Clear the active profile from the current shell. |
-| `eg exec <profile> -- <cmd>` | Run a command with the profile's env injected (subprocess only). |
-| `eg render <profile> [-o .env]` | Write a project env file. Default: `op://` refs. `--resolve`: real values (output must be git-ignored). `--force-resolve`: skip the check. |
-| `eg export <profile>` | Print the profile as `export` statements (for scripts / `eval "$(eg export x)"` in a direnv `.envrc`). |
+| `eg exec <profile>… -- <cmd>` | Run a command with the profile(s)' env injected (subprocess only). `--` required for 2+ profiles. |
+| `eg render <profile>… [-o .env]` | Write a project env file (merging multiple profiles). Default: `op://` refs. `--resolve`: real values (output must be git-ignored). `--force-resolve`: skip the check. |
+| `eg export <profile>…` | Print the profile(s) as `export` statements (for scripts / `eval "$(eg export x)"` in a direnv `.envrc`). |
 | `eg add <tool> <provider>` | Create a profile (and any tool config) from a recipe. |
 | `eg recipes` | List built-in recipes. |
 | `eg doctor [profile]` | Send a tiny real request to verify a provider works. |
@@ -221,9 +244,25 @@ config (comments and other providers included).
 
 ## Using `eg` from an AI agent
 
-`skills/eg/SKILL.md` is a Claude Code skill so an agent can run commands against a
-provider (`eg exec <profile> -- <cmd>`) or smoke-test one (`eg doctor`) without
-touching your shell or seeing secrets. Copy it to `~/.claude/skills/eg/`.
+`skills/eg/SKILL.md` is an [agent skill](https://github.com/vercel-labs/skills)
+so an agent can run commands against a provider (`eg exec <profile> -- <cmd>`) or
+smoke-test one (`eg doctor`) without touching your shell or seeing secrets.
+
+Install it with the [`skills`](https://github.com/vercel-labs/skills) CLI:
+
+```sh
+# install just the eg skill, globally, for Claude Code
+npx skills add stjbrown/env-garden --skill eg -g -a claude-code
+
+# or interactively pick from the repo
+npx skills add stjbrown/env-garden
+```
+
+It also works with any other agent the CLI supports (`-a opencode`, etc.). To
+install by hand instead, copy `skills/eg/SKILL.md` to `~/.claude/skills/eg/`.
+
+The skill is self-bootstrapping: if it's installed before the `eg` binary, it
+tells the agent how to install `eg` first (`brew install stjbrown/tap/eg`).
 
 ---
 

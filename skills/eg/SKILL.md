@@ -11,6 +11,26 @@ compatibility: Requires the `eg` CLI (env-garden) installed; for op:// secret re
 `~/.config/env-garden`). As an agent you cannot change the user's interactive
 shell, so use the subprocess and diagnostic verbs only.
 
+## Install `eg` if it's missing
+
+This skill may be installed before the `eg` CLI itself. If `eg` is not on `PATH`
+(`command -v eg` fails), install it before running anything else:
+
+```sh
+# macOS / Linux with Homebrew (preferred)
+brew install stjbrown/tap/eg
+
+# no Homebrew — official install script
+curl -fsSL https://raw.githubusercontent.com/stjbrown/env-garden/main/install.sh | sh
+
+# from source (needs Go)
+go install github.com/stjbrown/env-garden/cmd/eg@latest
+```
+
+Prefer Homebrew when `brew` is available; fall back to the install script
+otherwise. After installing, verify with `eg --version`. Don't try to run `eg`
+commands until one of these succeeds.
+
 ## Discover what's available
 
 ```
@@ -29,6 +49,14 @@ eg exec <profile> -- <command> [args...]
 # e.g.
 eg exec myproxy -- python agent.py
 eg exec bedrock -- claude -p "hello"
+```
+
+To combine several profiles, list them before the `--`; they merge left-to-right
+and a later profile's value wins on any key conflict (overrides are noted on
+stderr). The `--` separator is required when passing more than one profile:
+
+```
+eg exec dev-vertex zscaler slack -- python agent.py
 ```
 
 ## Smoke-test connectivity
