@@ -11,3 +11,6 @@
 /dist/
 /eg
 *.out
+
+# Local-only launch material (tweet drafts) — keep out of the repo
+/docs/ANNOUNCEMENT.md

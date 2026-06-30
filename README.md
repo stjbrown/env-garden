@@ -1,24 +1,41 @@
-# env-garden (`eg`)
+<div align="center">
 
-**A per-shell environment profile switcher with batteries.** Keep named sets of
-environment variables (with secrets in 1Password), and switch them
-**independently in each terminal** — Claude Code on Vertex in one window, Bedrock
-in another, a customer endpoint in a third.
+# 🌱 env-garden &nbsp;·&nbsp; `eg`
+
+### Switch environment profiles independently in every terminal.
+
+Run Claude Code on **Vertex** in one window, **Bedrock** in another, and a customer's
+**proxy** in a third — at the same time. Secrets live in 1Password and are resolved
+in memory, never written to disk.
+
+[![release](https://img.shields.io/github/v/release/stjbrown/env-garden?color=22c55e&label=release&logo=github)](https://github.com/stjbrown/env-garden/releases)
+[![license](https://img.shields.io/github/license/stjbrown/env-garden?color=22c55e)](LICENSE)
+![platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-22c55e)
+![shell](https://img.shields.io/badge/shell-zsh%20%7C%20bash-22c55e)
+![deps](https://img.shields.io/badge/runtime%20deps-0-22c55e)
+
+</div>
+
+<!-- TODO(launch): drop a terminal demo gif here — e.g. asciinema → svg, or a 10s screen capture.
+     <p align="center"><img src="docs/demo.gif" alt="eg in action" width="720"></p> -->
 
 ```sh
-eg use bedrock                  # switch THIS shell to the bedrock profile
-eg exec vertex -- python app.py # run one command with the vertex profile's env
-eg render staging -o .env       # write a project .env file from a profile
-eg doctor bedrock               # send a tiny real request to check it works
+eg use bedrock                          # switch THIS shell to the bedrock profile
+eg use dev-vertex zscaler slack         # …or stack several profiles into one env
+eg exec vertex -- python app.py         # run one command with a profile's env
+eg render staging -o .env               # write a project .env file from a profile
+eg doctor bedrock                       # send a tiny real request to check it works
 ```
 
-A *profile* is just a named set of env vars. You can project it onto your
-**current shell** (`use`), a **subprocess** (`exec`), or a **project file**
-(`render`).
+**Why?** Environment variables are global to a shell, so juggling several
+AI/cloud backends means `export`-ing, un-`export`-ing, and praying you didn't leave
+`AWS_PROFILE` set in the wrong window. `eg` makes a backend a **named profile** you
+project onto exactly where you want it — this shell (`use`), one subprocess (`exec`),
+or a file (`render`) — and keeps each terminal independent.
 
 > **Supported:** macOS and Linux (Intel & Apple Silicon / arm64), shells **zsh**
-> and **bash**. Windows isn't supported (works under WSL). See
-> [Requirements](#requirements) for optional dependencies.
+> and **bash**. Windows works under WSL. See [Requirements](#requirements) for
+> optional dependencies.
 
 ---
 
